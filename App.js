@@ -2,7 +2,11 @@ import React, { Component } from 'react';
 
 import {
   ViroARSceneNavigator,
+  ViroARPlaneSelector,
+  ViroNode,
 } from 'react-viro';
+
+import { Text, View } from 'react-native';
 
 var FirstScene = require('./js/FirstScene');
 var SecondScene = require('./js/SecondScene');
@@ -12,9 +16,14 @@ export default class ViroSample extends Component {
     super();
     /*Generate and pass scenes*/
     state = {
-      scenes:[FirstScene, SecondScene]
+      savedText: [],
+      text: "Text",
+      isLoaded: false,
+      scenes:[FirstScene, SecondScene],
     }
   }
+  
+  
 
   render() {
       return (
@@ -22,5 +31,7 @@ export default class ViroSample extends Component {
           initialScene={{scene: state.scenes[0], state: state}} />
       );
   }
+
+  
 
 }

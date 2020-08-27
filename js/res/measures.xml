@@ -1,0 +1,99 @@
+<METRICS profile="Chidamber-Kemerer metrics" timestamp="Tue, 25 Aug 2020 19:46:13 MSK">
+	<METRIC category="Class" name="Coupling between objects" abbreviation="CBO">
+		<VALUE measured="net.sf.sockettest.swing.SocketTestUdp" value="3.0"/>
+		<VALUE measured="net.sf.sockettest.MyTrustManager" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.PortModel.TML" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.UdpServer" value="2.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SocketTestServer" value="2.0"/>
+		<VALUE measured="net.sf.sockettest.PortModel" value="3.0"/>
+		<VALUE measured="net.sf.sockettest.SocketServer" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.swing.PortDialog" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.swing.About" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SocketTestClient" value="2.0"/>
+		<VALUE measured="net.sf.sockettest.SocketClient" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SplashScreen" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.SocketTest" value="6.0"/>
+		<VALUE measured="net.sf.sockettest.Util" value="0.0"/>
+	</METRIC>
+	<METRIC category="Class" name="Depth of inheritance tree" abbreviation="DIT">
+		<VALUE measured="net.sf.sockettest.swing.SocketTestUdp" value="5.0"/>
+		<VALUE measured="net.sf.sockettest.MyTrustManager" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.PortModel.TML" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.UdpServer" value="2.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SocketTestServer" value="5.0"/>
+		<VALUE measured="net.sf.sockettest.PortModel" value="2.0"/>
+		<VALUE measured="net.sf.sockettest.SocketServer" value="2.0"/>
+		<VALUE measured="net.sf.sockettest.swing.PortDialog" value="6.0"/>
+		<VALUE measured="net.sf.sockettest.swing.About" value="5.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SocketTestClient" value="5.0"/>
+		<VALUE measured="net.sf.sockettest.SocketClient" value="2.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SplashScreen" value="5.0"/>
+		<VALUE measured="net.sf.sockettest.SocketTest" value="6.0"/>
+		<VALUE measured="net.sf.sockettest.Util" value="1.0"/>
+	</METRIC>
+	<METRIC category="Class" name="Lack of Cohesion of Methods" abbreviation="LCOM">
+		<VALUE measured="net.sf.sockettest.swing.SocketTestUdp" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.MyTrustManager" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.PortModel.TML" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.UdpServer" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SocketTestServer" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.PortModel" value="4.0"/>
+		<VALUE measured="net.sf.sockettest.SocketServer" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.swing.PortDialog" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.swing.About" value="0.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SocketTestClient" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.SocketClient" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SplashScreen" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.SocketTest" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.Util" value="4.0"/>
+	</METRIC>
+	<METRIC category="Class" name="Number of children" abbreviation="NOC">
+		<VALUE measured="net.sf.sockettest.swing.SocketTestUdp" value="0.0"/>
+		<VALUE measured="net.sf.sockettest.MyTrustManager" value="0.0"/>
+		<VALUE measured="net.sf.sockettest.PortModel.TML" value="0.0"/>
+		<VALUE measured="net.sf.sockettest.UdpServer" value="0.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SocketTestServer" value="0.0"/>
+		<VALUE measured="net.sf.sockettest.PortModel" value="0.0"/>
+		<VALUE measured="net.sf.sockettest.SocketServer" value="0.0"/>
+		<VALUE measured="net.sf.sockettest.swing.PortDialog" value="0.0"/>
+		<VALUE measured="net.sf.sockettest.swing.About" value="0.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SocketTestClient" value="0.0"/>
+		<VALUE measured="net.sf.sockettest.SocketClient" value="0.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SplashScreen" value="0.0"/>
+		<VALUE measured="net.sf.sockettest.SocketTest" value="0.0"/>
+		<VALUE measured="net.sf.sockettest.Util" value="0.0"/>
+	</METRIC>
+	<METRIC category="Class" name="Response for class" abbreviation="RFC">
+		<VALUE measured="net.sf.sockettest.swing.SocketTestUdp" value="67.0"/>
+		<VALUE measured="net.sf.sockettest.MyTrustManager" value="17.0"/>
+		<VALUE measured="net.sf.sockettest.PortModel.TML" value="3.0"/>
+		<VALUE measured="net.sf.sockettest.UdpServer" value="21.0"/>
+		<VALUE measured="net.sf.sockettest.NetService" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SocketTestServer" value="72.0"/>
+		<VALUE measured="net.sf.sockettest.PortModel" value="13.0"/>
+		<VALUE measured="net.sf.sockettest.SocketServer" value="27.0"/>
+		<VALUE measured="net.sf.sockettest.swing.PortDialog" value="11.0"/>
+		<VALUE measured="net.sf.sockettest.swing.About" value="30.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SocketTestClient" value="79.0"/>
+		<VALUE measured="net.sf.sockettest.SocketClient" value="22.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SplashScreen" value="21.0"/>
+		<VALUE measured="net.sf.sockettest.SocketTest" value="33.0"/>
+		<VALUE measured="net.sf.sockettest.Util" value="25.0"/>
+	</METRIC>
+	<METRIC category="Class" name="Weighted method complexity" abbreviation="WMC">
+		<VALUE measured="net.sf.sockettest.swing.SocketTestUdp" value="34.0"/>
+		<VALUE measured="net.sf.sockettest.MyTrustManager" value="11.0"/>
+		<VALUE measured="net.sf.sockettest.PortModel.TML" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.UdpServer" value="16.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SocketTestServer" value="33.0"/>
+		<VALUE measured="net.sf.sockettest.PortModel" value="10.0"/>
+		<VALUE measured="net.sf.sockettest.SocketServer" value="21.0"/>
+		<VALUE measured="net.sf.sockettest.swing.PortDialog" value="3.0"/>
+		<VALUE measured="net.sf.sockettest.swing.About" value="1.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SocketTestClient" value="30.0"/>
+		<VALUE measured="net.sf.sockettest.SocketClient" value="12.0"/>
+		<VALUE measured="net.sf.sockettest.swing.SplashScreen" value="2.0"/>
+		<VALUE measured="net.sf.sockettest.SocketTest" value="10.0"/>
+		<VALUE measured="net.sf.sockettest.Util" value="5.0"/>
+	</METRIC>
+</METRICS>
