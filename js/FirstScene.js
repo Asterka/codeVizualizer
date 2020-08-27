@@ -29,6 +29,8 @@ export class FirstScene extends Component {
     super();
     this.state = {
       text: "Initial text",
+      num: 0,
+      classKeys: [],
       scaleUp: true,
       isLoaded: false,
       savedText: ""
@@ -110,17 +112,19 @@ export class FirstScene extends Component {
   }
   _calculateMetrics(str){
     let array = {};
-    str.getElementsByTagName("measures")[0]["children"].forEach(element => {
-      array[element["children"][0]["value"]] = 
-      {
-      "value":element["children"][1]["value"],
-      "mean":element["children"][2]["value"],
-      "min":element["children"][3]["value"],
-      "max":element["children"][4]["value"],
-      "MaxClass":element["children"][5]["value"]
-      }
-    }
-    );
+    let classes = []
+    str.getElementsByTagName("METRICS")[0]["children"].forEach(element => {
+      array[element["attributes"]["name"]] = {}
+      element["children"].forEach(valueForClass => {
+        array[element["attributes"]["name"]][valueForClass["attributes"]["measured"]] = valueForClass["attributes"]["value"]
+      });
+      element["children"].forEach(classCounter => {
+        classes[classes.length] = classCounter["attributes"]["measured"]
+      });
+      this.setState({
+        classKeys: classes
+      })
+    });
     return array
   }
   _pushNextScene() {
@@ -128,17 +132,12 @@ export class FirstScene extends Component {
   }
 
   _logText() {
-    if (this.state.text === "text 1") {
+
       if(this.state.isLoaded){
       this.setState({
-        text: this.state["Depth of Inheritance Tree"].mean
+        text: "Class" + this.state.classKeys[this.state.num+1] + " " + this.state["Coupling between objects"][this.state.classKeys[this.state.num+1]],
+        num: this.state.num < this.state.classKeys.length ? this.state.num +1:0
       });
-    }
-    else{
-      this.setState({
-        text: "text 2"
-      });
-    }
     } else {
       this.setState({
         text: "text 1"
