@@ -110,16 +110,21 @@ export class FirstScene extends Component {
         </ViroARScene>);
     }
   }
+
   _calculateMetrics(str){
+    //Init the array
     let array = {};
-    let classes = []
+    //init the classes object to be saved later
+    //classes contains Object keys for each METRIC value
+    let classes = Object.keys(str.getElementsByTagName("METRICS")[0]["children"]);
+    //For every METRIC consider it as an "element"
     str.getElementsByTagName("METRICS")[0]["children"].forEach(element => {
+      //init the object of this METRIC
       array[element["attributes"]["name"]] = {}
+      //for every VALUE of the metric (a value for the each of the inspected project classes)
       element["children"].forEach(valueForClass => {
+        //add it as an object with its name as a key to the parent object and its measured value as a value on that key 
         array[element["attributes"]["name"]][valueForClass["attributes"]["measured"]] = valueForClass["attributes"]["value"]
-      });
-      element["children"].forEach(classCounter => {
-        classes[classes.length] = classCounter["attributes"]["measured"]
       });
       this.setState({
         classKeys: classes
@@ -128,6 +133,7 @@ export class FirstScene extends Component {
     return array
   }
   _pushNextScene() {
+    //Pass the scenes to the ARScene
     this.props.sceneNavigator.push({ scene: state.scenes[1], state: state });
   }
 
