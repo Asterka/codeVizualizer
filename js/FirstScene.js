@@ -29,28 +29,27 @@ export class FirstScene extends Component {
     super();
     this.state = {
       text: "Initial text",
-      num: 0,
-      classKeys: [],
-      scaleUp: true,
       isLoaded: false,
-      savedText: ""
+      
     };
 
     // bind 'this' to functions
-    this._calculateMetrics = this._calculateMetrics.bind(this);
     this._logText = this._logText.bind(this);
     this._pushNextScene = this._pushNextScene.bind(this);
   }
 
   componentDidMount() {
-    fetch("http://192.168.0.101:3001/")
-      .then(res => res.text())
-      .then(
-        (result) => { 
-          let xml = new XMLParser().parseFromString(result);
+    //fetch the data for the scene,
+    //here I use the servers API, providing the short form of the metric name
+    //full information about the shortnames mapping should be added to the project's
+    //repository page
+    fetch("http://192.168.0.101:3001/api?metric=CBO")
+      .then(res => res.json())
+      .then((json) => {
           this.setState(
-            {...{"isLoaded": "true",
-            }, ...this._calculateMetrics(xml)}
+            {"isLoaded": "true",
+            
+          }
           );
         },
         (error) => {
@@ -111,27 +110,6 @@ export class FirstScene extends Component {
     }
   }
 
-  _calculateMetrics(str){
-    //Init the array
-    let array = {};
-    //init the classes object to be saved later
-    //classes contains Object keys for each METRIC value
-    let classes = Object.keys(str.getElementsByTagName("METRICS")[0]["children"]);
-    //For every METRIC consider it as an "element"
-    str.getElementsByTagName("METRICS")[0]["children"].forEach(element => {
-      //init the object of this METRIC
-      array[element["attributes"]["name"]] = {}
-      //for every VALUE of the metric (a value for the each of the inspected project classes)
-      element["children"].forEach(valueForClass => {
-        //add it as an object with its name as a key to the parent object and its measured value as a value on that key 
-        array[element["attributes"]["name"]][valueForClass["attributes"]["measured"]] = valueForClass["attributes"]["value"]
-      });
-      this.setState({
-        classKeys: classes
-      })
-    });
-    return array
-  }
   _pushNextScene() {
     //Pass the scenes to the ARScene
     this.props.sceneNavigator.push({ scene: state.scenes[1], state: state });
@@ -141,8 +119,7 @@ export class FirstScene extends Component {
 
       if(this.state.isLoaded){
       this.setState({
-        text: "Class" + this.state.classKeys[this.state.num+1] + " " + this.state["Coupling between objects"][this.state.classKeys[this.state.num+1]],
-        num: this.state.num < this.state.classKeys.length ? this.state.num +1:0
+        text: this.state.text,
       });
     } else {
       this.setState({
