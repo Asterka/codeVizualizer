@@ -30,7 +30,7 @@ export class FirstScene extends Component {
     this.state = {
       text: "Initial text",
       isLoaded: false,
-      
+      loadedData: []
     };
 
     // bind 'this' to functions
@@ -43,14 +43,13 @@ export class FirstScene extends Component {
     //here I use the servers API, providing the short form of the metric name
     //full information about the shortnames mapping should be added to the project's
     //repository page
-    fetch("http://192.168.0.101:3001/api?metric=CBO")
+    return fetch("http://192.168.0.101:3001/api?metric=CBO")
       .then(res => res.json())
       .then((json) => {
-          this.setState(
-            {"isLoaded": "true",
-            
-          }
-          );
+          this.setState({
+            isLoaded: true,
+            loadedData: json.values,
+            });
         },
         (error) => {
           this.setState({
@@ -62,50 +61,81 @@ export class FirstScene extends Component {
 
 
   render() {
-    if(!state.isLoaded){
+    if(!this.state.isLoaded){
     return (
       <ViroARScene>
-        {/* Development Console */}
-        <ViroText text={this.state.text} scale={[0.5, 0.5, 0.5]} position={[1, 0.5, -2.5]} style={styles.helloWorldTextStyle}
+        <ViroText text={"Loading..."} scale={[0.5, 0.5, 0.5]} position={[1, 1.5, -2.5]} style={styles.helloWorldTextStyle}
+        materials={["frontMaterial", "backMaterial", "sideMaterial"]}
+        extrusionDepth={8}/>
+        {/* <ViroText text={"test"} scale={[0.5, 0.5, 0.5]} position={[1, 0.5, -2.5]} style={styles.helloWorldTextStyle}
           materials={["frontMaterial", "backMaterial", "sideMaterial"]}
           extrusionDepth={8}
         />
 
         <ViroAmbientLight color={"#aaaaaa"} />
         <ViroSpotLight innerAngle={5} outerAngle={90} direction={[0, -1, -.2]}
-          position={[0, 3, 1]} color="#ffffff" castsShadow={true} />
+          position={[0, 3, 1]} color="#ffffff" castsShadow={true} /> */}
 
-        <ViroText text="Next Scene" scale={[0.5, 0.5, 0.5]} position={[1, 1.5, -2.5]} style={styles.helloWorldTextStyle}
+        {/* <ViroText text="Next Scene" scale={[0.5, 0.5, 0.5]} position={[1, 1.5, -2.5]} style={styles.helloWorldTextStyle}
           materials={["frontMaterial", "backMaterial", "sideMaterial"]}
           extrusionDepth={8}
-          onClick={(props) => { this._pushNextScene(props) }} />
+          onClick={(props) => { this._pushNextScene(props) }} /> */}
+        {/* 
         <ViroBox position={[-1, 0, -1]} scale={[scaleVal[0], scaleVal[0], scaleVal[0]]} materials={["grid"]}
           onClick={this._logText} />
 
         <ViroBox position={[1, 0, -1]} scale={[scaleVal[1], scaleVal[1], scaleVal[1]]} materials={["grid"]}
-          onClick={this._logText} />
-
-        <ViroPortalScene passable={true} dragType="FixedDistance" onDrag={() => { }}>
-          <ViroPortal position={[0, 0, -1]} scale={[.1, .1, .1]}>
-            <Viro3DObject source={require('./res/portal_res/portal_ship/portal_ship.vrx')}
-              resources={[require('./res/portal_res/portal_ship/portal_ship_diffuse.png'),
-              require('./res/portal_res/portal_ship/portal_ship_normal.png'),
-              require('./res/portal_res/portal_ship/portal_ship_specular.png')]}
-              type="VRX" />
-          </ViroPortal>
-          <Viro360Image source={require("./res/pic.jpg")} />
-          <ViroBox position={[1, 0, -3]} scale={[scaleVal[1], scaleVal[1], scaleVal[1]]} materials={["grid"]}
-          onClick={this._logText} />
-        </ViroPortalScene>
+          onClick={this._logText} /> */}
       </ViroARScene>
     );}
     else{
+      let counter = 0;
+      let length = this.state.loadedData.length
+      let max = 0;
+      let min = 1000;
+      //Find min and max
+      this.state.loadedData.forEach(element => {
+        if(max <= element.value){
+          max = element.value
+        }
+        if(min >= element.value){
+          min = element.value
+        }
+      });
+
+      let side = 0;
+      let fieldCapacity = 5
+      let fieldSize = 2;
+      let initX, initY = 0;
+      //find the square size
+      for(let i = 2;i < 100;i++){
+        if(i*i >= length){
+          side = i + "";
+          break;
+        }
+      }
+      
+      let data = this.state.loadedData.map((val, key)=>{
+        counter++;
+         return <ViroBox position={[Math.floor(counter%fieldCapacity),
+           -2,
+            Math.floor(counter/fieldCapacity)
+          
+          ]} scale={[fieldSize/fieldCapacity, 4*val.value/max + 1, fieldSize/fieldCapacity]} key={key} materials={["grid"]}
+         onClick={this._logText} />
+        
+      })
       return(
         <ViroARScene>
-        <ViroText text="Next Scene" scale={[0.5, 0.5, 0.5]} position={[1, 1.5, -2.5]} style={styles.helloWorldTextStyle}
+          {data}
+          <ViroText text="Next Scene" scale={[0.5, 0.5, 0.5]} position={[1, 1.5, -2.5]} style={styles.helloWorldTextStyle}
           materials={["frontMaterial", "backMaterial", "sideMaterial"]}
           extrusionDepth={8}
-          onClick={(props) => { this._pushNextScene(props) }} />
+          onClick={(props) => { this._pushNextScene(props) }} /> 
+          <ViroText text={fieldSize/fieldCapacity} scale={[1, 1, 1]} position={[-2, 1.5, -2.5]} style={styles.helloWorldTextStyle}
+          materials={["frontMaterial", "backMaterial", "sideMaterial"]}
+          extrusionDepth={8}
+           />  
         </ViroARScene>);
     }
   }
