@@ -25,9 +25,12 @@
     "@babel/core": "^7.10.3",
     "@babel/runtime": "^7.10.3",
     "babel-jest": "^26.1.0",
+    "formik": "^2.2.6",
     "jest": "^26.1.0",
     "metro-react-native-babel-preset": "^0.59.0",
-    "react-test-renderer": "16.8.3"
+    "react-native-modal": "^11.10.0",
+    "react-test-renderer": "16.8.3",
+    "yup": "^0.32.9"
   },
   "jest": {
     "preset": "react-native"

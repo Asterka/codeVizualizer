@@ -1,15 +1,16 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
 import {
   ViroARSceneNavigator,
   ViroARPlaneSelector,
   ViroNode,
-} from 'react-viro';
+} from "react-viro";
 
-import { Text, View } from 'react-native';
+import { Text, View } from "react-native";
+import ModalDemo from "./js/shared/components/Modal";
 
-var FirstScene = require('./js/FirstScene');
-var SecondScene = require('./js/SecondScene');
+var FirstScene = require("./js/FirstScene");
+var SecondScene = require("./js/SecondScene");
 
 export default class ViroSample extends Component {
   constructor() {
@@ -18,20 +19,21 @@ export default class ViroSample extends Component {
     state = {
       savedText: [],
       text: "Text",
+      isLoggedIn: false,
       isLoaded: false,
-      scenes:[FirstScene, SecondScene],
-    }
+      scenes: [FirstScene, SecondScene],
+    };
   }
-  
-  
 
   render() {
+    if (state.isLoggedIn) {
       return (
         <ViroARSceneNavigator
-          initialScene={{scene: state.scenes[0], state: state}} />
+          initialScene={{ scene: state.scenes[0], state: state }}
+        />
       );
+    } else {
+      return <ModalDemo isLoggedIn={state.isLoggedIn}/>;
+    }
   }
-
-  
-
 }
