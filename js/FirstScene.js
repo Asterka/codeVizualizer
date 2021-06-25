@@ -2,11 +2,13 @@
 
 import React, { Component } from "react";
 
-import { StyleSheet, Alert} from "react-native";
+import { StyleSheet, Alert } from "react-native";
 
 var XMLParser = require("react-xml-parser");
 
 var SecondScene = require("./SecondScene");
+
+import PortalAsset from "./res/portal";
 
 import {
   ViroPortal,
@@ -14,11 +16,10 @@ import {
   Viro360Image,
   Viro3DObject,
   ViroARScene,
-  ViroARPlaneSelector,
+  ViroARPlane,
   ViroBox,
   ViroAmbientLight,
   ViroMaterials,
-  ViroSpotLight,
   ViroText,
   ViroNode,
   lightingModel,
@@ -26,15 +27,30 @@ import {
   ViroDirectionalLight,
   ViroARCamera,
 } from "react-viro";
-
+let portal3D = {};
 export class FirstScene extends Component {
   constructor() {
     super();
     this.state = {
       text: "Initial text",
-      textPosX: -100,
-      textPosY: -100,
-      textPosZ: -100,
+      textPosX: -1,
+      textPosY: -1,
+      textPosZ: -1,
+      portals: {
+        portalsShown: false,
+        portalsLoading: false,
+      },
+      cameraPosition: {
+        posX: 0,
+        posY: 0,
+        posZ: 0,
+      },
+      standPos: {
+        isSet: false,
+        posX: 0,
+        posY: 0,
+        posZ: 0,
+      },
       isLoaded: false,
       rotation: [0, 0, 0],
       loadedData: [],
@@ -42,7 +58,10 @@ export class FirstScene extends Component {
 
     // bind 'this' to functions
     this._logText = this._logText.bind(this);
+    this._setStartValue = this._setStartValue.bind(this);
     this._pushNextScene = this._pushNextScene.bind(this);
+    this._updateCoordinates = this._updateCoordinates.bind(this);
+    this._setPortalLoadingStatus = this._setPortalLoadingStatus.bind(this);
   }
 
   componentDidMount() {
@@ -50,8 +69,7 @@ export class FirstScene extends Component {
     //here I use the servers API, providing the short form of the metric name
     //full information about the shortnames mapping should be added to the project's
     //repository page
-    Alert.alert(state.connectInfo);
-    return fetch("http://192.168.1.38:3001/api?metric=CBO")
+    return fetch("http://192.168.0.105:3001/api?metric=CBO")
       .then((res) => res.json())
       .then(
         (json) => {
@@ -137,7 +155,7 @@ export class FirstScene extends Component {
               materials={["basic"]}
             />
             <ViroText
-              text={this.state.text}
+              text={val.value}
               position={[
                 this.state.textPosX,
                 this.state.textPosZ,
@@ -152,11 +170,88 @@ export class FirstScene extends Component {
         );
       });
       return (
-        <ViroARScene>
+        <ViroARScene
+          onCameraTransformUpdate={(data) => this._updateCoordinates(data)}
+        >
           <ViroAmbientLight color="#FFFFFF" intensity={250} />
           <ViroDirectionalLight color="#FFFFFF" direction={[0, -1, 0]} />
           <ViroDirectionalLight color="#FFFFFF" direction={[0, 0, -1]} />
-          {data}
+          <ViroARPlane
+            minHeight={0.5}
+            minWidth={0.5}
+            alignment={"Horizontal"}
+            onAnchorFound={(data) => this._setStartValue(data)}
+            ignoreEventHandling={this.state.standPos.isSet}
+          >
+            <ViroBox
+              position={[0, -1, 0]}
+              scale={[1, 0.05, 1]}
+              materials={["basic"]}
+            />
+          </ViroARPlane>
+
+          {this.state.portals.portalsShown ? (
+            <>
+              {this.state.portals.portalsLoading ? (
+                <ViroText
+                  text="Loading..."
+                  scale={[0.5, 0.5, 0.5]}
+                  position={[
+                    this.state.standPos.posX,
+                    0,
+                    this.state.standPos.posY,
+                  ]}
+                  style={styles.helloWorldTextStyle}
+                  materials={["frontMaterial", "backMaterial", "sideMaterial"]}
+                  extrusionDepth={8}
+                  onClick={() => {
+                    Alert.alert("First, enter the square");
+                  }}
+                />
+              ) : (
+                <></>
+              )}
+              <ViroPortalScene
+                passable={true}
+                dragType="FixedDistance"
+                onDrag={() => {}}
+              >
+                <ViroPortal
+                  position={[
+                    this.state.standPos.posX,
+                    0,
+                    this.state.standPos.posY,
+                  ]}
+                  scale={[0.1, 0.1, 0.1]}
+                >
+                  <Viro3DObject
+                    source={require("./res/portal_res/portal_ship/portal_ship.vrx")}
+                    resources={[
+                      require("./res/portal_res/portal_ship/portal_ship_diffuse.png"),
+                      require("./res/portal_res/portal_ship/portal_ship_normal.png"),
+                      require("./res/portal_res/portal_ship/portal_ship_specular.png"),
+                    ]}
+                    type="VRX"
+                    onLoadStart={()=>{this._setPortalLoadingStatus(true)}}
+                    onLoadEnd={()=>{this._setPortalLoadingStatus(false)}}
+                  />
+                </ViroPortal>
+                {data}
+              </ViroPortalScene>
+            </>
+          ) : (
+            <ViroText
+              text="Stand here"
+              scale={[0.5, 0.5, 0.5]}
+              position={[this.state.standPos.posX, 0, this.state.standPos.posY]}
+              style={styles.helloWorldTextStyle}
+              materials={["frontMaterial", "backMaterial", "sideMaterial"]}
+              extrusionDepth={8}
+              onClick={() => {
+                Alert.alert("First, enter the square");
+              }}
+            />
+          )}
           <ViroText
             text="Next Scene"
             scale={[0.5, 0.5, 0.5]}
@@ -181,18 +276,32 @@ export class FirstScene extends Component {
             materials={["frontMaterial", "backMaterial", "sideMaterial"]}
             extrusionDepth={8}
           />
-          {/* <ViroText text={fieldSize/fieldCapacity} scale={[1, 1, 1]} position={[-2, 1.5, -2.5]} style={styles.helloWorldTextStyle}
-          materials={["frontMaterial", "backMaterial", "sideMaterial"]}
-          extrusionDepth={8}
-           />   */}
-          <ViroQuad
-            position={[1.5, -3, 1.5]}
-            rotation={[-90, 0, 0]}
-            width={5}
-            height={5}
-          />
         </ViroARScene>
       );
+    }
+  }
+
+  _updateCoordinates(data) {
+    if (this.state.standPos.isSet) {
+      let diff = Math.sqrt(
+        Math.pow(this.state.standPos.posX - data.position[0], 2) +
+          Math.pow(this.state.standPos.posY - data.position[2], 2)
+      );
+      if (diff != undefined) {
+        if (diff <= 1.3) {
+          this.setState({
+            portals: Object.assign({}, this.state.portals, {portalsShown: true}),
+          });
+        } else {
+          this.setState({
+            portals: Object.assign({}, this.state.portals, {portalsShown: false, portalsLoading: false}),
+          });
+        }
+      } else {
+        this.setState({
+          portals: Object.assign({}, this.state.portals, {portalsShown: true, portalsLoading: false}),
+        });
+      }
     }
   }
 
@@ -205,13 +314,27 @@ export class FirstScene extends Component {
     if (this.state.isLoaded) {
       this.setState({
         text: this.state.text,
-        textPosX: "",
       });
     } else {
       this.setState({
         text: "text 1",
       });
     }
+  }
+  _setPortalLoadingStatus(loading){
+    this.setState({
+      portals: Object.assign({}, this.state.portals, {portalsLoading: loading})
+    })
+  }
+  _setStartValue(data) {
+    this.setState({
+      standPos: {
+        isSet: true,
+        posX: data.position[0],
+        posZ: data.position[1],
+        posY: data.position[2],
+      },
+    });
   }
   _displayName({ name, posX, posY, posZ }) {
     this.setState({

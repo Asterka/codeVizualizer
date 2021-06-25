@@ -25,7 +25,6 @@ const ModalDemo = () => {
 };
 const styles = StyleSheet.create({
   baseText: {
-    fontFamily: "roboto-medium",
   },
   modalContainer: {
     flex: 1,

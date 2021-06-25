@@ -12,6 +12,7 @@ import ModalDemo from "./js/shared/components/Modal";
 var FirstScene = require("./js/FirstScene");
 var SecondScene = require("./js/SecondScene");
 
+
 export default class ViroSample extends Component {
   constructor() {
     super();
@@ -22,18 +23,15 @@ export default class ViroSample extends Component {
       isLoggedIn: false,
       isLoaded: false,
       scenes: [FirstScene, SecondScene],
+      credentials: ['', '']
     };
   }
-
+  
   render() {
-    if (state.isLoggedIn) {
       return (
         <ViroARSceneNavigator
           initialScene={{ scene: state.scenes[0], state: state }}
         />
       );
-    } else {
-      return <ModalDemo isLoggedIn={state.isLoggedIn}/>;
-    }
   }
 }

@@ -19,12 +19,12 @@ export default function LoginForm() {
           <View>
             <TextInput
               onChangeText={handleChange("userID")}
-              value={values.email}
+              value={values.userID}
               style={{ backgroundColor: "white", borderRadius: 8, height: 25 }}
             />
             <TextInput
               onChangeText={handleChange("projectID")}
-              value={values.email}
+              value={values.projectID}
               style={{ backgroundColor: "white", borderRadius: 8, height: 25, marginTop: 10 }}
             />
 
