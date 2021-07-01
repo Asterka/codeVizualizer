@@ -1,31 +1,26 @@
 "use strict";
 
 import React, { Component } from "react";
+import axios from "axios";
 
 import { StyleSheet, Alert } from "react-native";
+import { codeVisualizerServer } from "../config";
 
 var XMLParser = require("react-xml-parser");
 
 var SecondScene = require("./SecondScene");
 
-import PortalAsset from "./res/portal";
-
 import {
   ViroPortal,
   ViroPortalScene,
-  Viro360Image,
   Viro3DObject,
   ViroARScene,
-  ViroARPlane,
-  ViroBox,
+  ViroARPlaneSelector,
   ViroAmbientLight,
   ViroMaterials,
   ViroText,
-  ViroNode,
-  lightingModel,
-  ViroQuad,
+  ViroBox,
   ViroDirectionalLight,
-  ViroARCamera,
 } from "react-viro";
 let portal3D = {};
 export class FirstScene extends Component {
@@ -33,6 +28,7 @@ export class FirstScene extends Component {
     super();
     this.state = {
       text: "Initial text",
+      chosen_project: 0,
       textPosX: -1,
       textPosY: -1,
       textPosZ: -1,
@@ -52,8 +48,9 @@ export class FirstScene extends Component {
         posZ: 0,
       },
       isLoaded: false,
+      isLoading: false,
       rotation: [0, 0, 0],
-      loadedData: [],
+      loadedData: {},
     };
 
     // bind 'this' to functions
@@ -62,36 +59,23 @@ export class FirstScene extends Component {
     this._pushNextScene = this._pushNextScene.bind(this);
     this._updateCoordinates = this._updateCoordinates.bind(this);
     this._setPortalLoadingStatus = this._setPortalLoadingStatus.bind(this);
+    this._metricGenerator = this._metricGenerator.bind(this);
   }
-
   componentDidMount() {
-    //fetch the data for the scene,
-    //here I use the servers API, providing the short form of the metric name
-    //full information about the shortnames mapping should be added to the project's
-    //repository page
-    return fetch("http://192.168.0.105:3001/api?metric=CBO")
-      .then((res) => res.json())
-      .then(
-        (json) => {
-          this.setState({
-            isLoaded: true,
-            loadedData: json.values,
-          });
-        },
-        (error) => {
-          this.setState({
-            isLoaded: true,
-          });
-        }
-      );
+    if (this.state.isLoaded != true) {
+      /* Set initial state  */
+      this.setState({ isLoading: true });
+      this.setState({ isLoaded: false });
+      this._metricGenerator();
+    }
   }
 
   render() {
-    if (!this.state.isLoaded) {
+    if (this.state.isLoaded !== true) {
       return (
         <ViroARScene>
           <ViroText
-            text={"Loading..."}
+            text={`Loading ${codeVisualizerServer.project_ids[this.state.chosen_project]} ...`}
             scale={[0.5, 0.5, 0.5]}
             position={[1, 1.5, -2.5]}
             style={styles.helloWorldTextStyle}
@@ -101,74 +85,6 @@ export class FirstScene extends Component {
         </ViroARScene>
       );
     } else {
-      let counter = 0;
-      let length = this.state.loadedData.length;
-      let max = 0;
-      let min = 1000;
-      //Find min and max
-      this.state.loadedData.forEach((element) => {
-        if (max <= element.value) {
-          max = element.value;
-        }
-        if (min >= element.value) {
-          min = element.value;
-        }
-      });
-
-      let side = 0;
-      let fieldCapacity = 5;
-      let fieldSize = 2;
-      let initX,
-        initY = 0;
-      //find the square size
-      for (let i = 2; i < 100; i++) {
-        if (i * i >= length) {
-          side = i + "";
-          break;
-        }
-      }
-
-      let data = this.state.loadedData.map((val, key) => {
-        counter++;
-        return (
-          <>
-            <ViroBox
-              position={[
-                Math.floor(counter % fieldCapacity),
-                -2,
-                Math.floor(counter / fieldCapacity),
-              ]}
-              scale={[
-                fieldSize / fieldCapacity,
-                (4 * val.value) / max + 1,
-                fieldSize / fieldCapacity,
-              ]}
-              key={key}
-              onClick={() => {
-                this._displayName({
-                  name: val.className,
-                  posX: Math.floor(counter % fieldCapacity),
-                  posY: -2 + (4 * val.value) / max,
-                  posZ: Math.floor(counter / fieldCapacity),
-                });
-              }}
-              materials={["basic"]}
-            />
-            <ViroText
-              text={val.value}
-              position={[
-                this.state.textPosX,
-                this.state.textPosZ,
-                this.state.textPosY,
-              ]}
-              rotation={this.state.rotation}
-              style={styles.helloWorldTextStyle}
-              materials={["frontMaterial", "backMaterial", "sideMaterial"]}
-              extrusionDepth={8}
-            />
-          </>
-        );
-      });
       return (
         <ViroARScene
           onCameraTransformUpdate={(data) => this._updateCoordinates(data)}
@@ -176,19 +92,24 @@ export class FirstScene extends Component {
           <ViroAmbientLight color="#FFFFFF" intensity={250} />
           <ViroDirectionalLight color="#FFFFFF" direction={[0, -1, 0]} />
           <ViroDirectionalLight color="#FFFFFF" direction={[0, 0, -1]} />
-          <ViroARPlane
+          <ViroARPlaneSelector
             minHeight={0.5}
             minWidth={0.5}
             alignment={"Horizontal"}
-            onAnchorFound={(data) => this._setStartValue(data)}
+            onPlaneSelected={(data) => this._setStartValue(data)}
             ignoreEventHandling={this.state.standPos.isSet}
           >
-            <ViroBox
-              position={[0, -1, 0]}
-              scale={[1, 0.05, 1]}
-              materials={["basic"]}
-            />
-          </ViroARPlane>
+            <Viro3DObject
+              source={require("./res/portal/button_floor_export.obj")}
+              position={[
+                this.state.standPos.posX,
+                this.state.standPos.posY,
+                this.state.standPos.posZ,
+              ]}
+              scale={[1, 1, 1]}
+              type="OBJ"
+            ></Viro3DObject>
+          </ViroARPlaneSelector>
 
           {this.state.portals.portalsShown ? (
             <>
@@ -198,8 +119,8 @@ export class FirstScene extends Component {
                   scale={[0.5, 0.5, 0.5]}
                   position={[
                     this.state.standPos.posX,
-                    0,
                     this.state.standPos.posY,
+                    this.state.standPos.posZ,
                   ]}
                   style={styles.helloWorldTextStyle}
                   materials={["frontMaterial", "backMaterial", "sideMaterial"]}
@@ -211,16 +132,36 @@ export class FirstScene extends Component {
               ) : (
                 <></>
               )}
+              <ViroText
+                text="LOC"
+                scale={[0.5, 0.5, 0.5]}
+                position={[
+                  this.state.standPos.posX,
+                  this.state.standPos.posY + 1,
+                  this.state.standPos.posZ,
+                ]}
+                style={styles.helloWorldTextStyle}
+                materials={["frontMaterial", "backMaterial", "sideMaterial"]}
+                extrusionDepth={8}
+                onClick={() => {
+                  Alert.alert("Enter this scene to inspect LoC metric");
+                }}
+              />
               <ViroPortalScene
                 passable={true}
                 dragType="FixedDistance"
                 onDrag={() => {}}
               >
+                {this.state.loadedData.LOC.data ? (
+                  this.state.loadedData.LOC.data
+                ) : (
+                  <></>
+                )}
                 <ViroPortal
                   position={[
                     this.state.standPos.posX,
-                    0,
                     this.state.standPos.posY,
+                    this.state.standPos.posZ,
                   ]}
                   scale={[0.1, 0.1, 0.1]}
                 >
@@ -232,18 +173,115 @@ export class FirstScene extends Component {
                       require("./res/portal_res/portal_ship/portal_ship_specular.png"),
                     ]}
                     type="VRX"
-                    onLoadStart={()=>{this._setPortalLoadingStatus(true)}}
-                    onLoadEnd={()=>{this._setPortalLoadingStatus(false)}}
+                    onLoadStart={() => {
+                      this._setPortalLoadingStatus(true);
+                    }}
+                    onLoadEnd={() => {
+                      this._setPortalLoadingStatus(false);
+                    }}
                   />
                 </ViroPortal>
-                {data}
+              </ViroPortalScene>
+              <ViroText
+                text="COMPLEXITY"
+                scale={[0.5, 0.5, 0.5]}
+                position={[
+                  this.state.standPos.posX + 1,
+                  this.state.standPos.posY + 1,
+                  this.state.standPos.posZ,
+                ]}
+                style={styles.helloWorldTextStyle}
+                materials={["frontMaterial", "backMaterial", "sideMaterial"]}
+                extrusionDepth={8}
+                onClick={() => {
+                  Alert.alert("Enter this scene to inspect LoC metric");
+                }}
+              />
+              <ViroPortalScene
+                passable={true}
+                dragType="FixedDistance"
+                onDrag={() => {}}
+              >
+                <ViroPortal
+                  position={[
+                    this.state.standPos.posX + 1,
+                    this.state.standPos.posY,
+                    this.state.standPos.posZ,
+                  ]}
+                  scale={[0.1, 0.1, 0.1]}
+                >
+                  <Viro3DObject
+                    source={require("./res/portal_res/portal_ship/portal_ship.vrx")}
+                    resources={[
+                      require("./res/portal_res/portal_ship/portal_ship_diffuse.png"),
+                      require("./res/portal_res/portal_ship/portal_ship_normal.png"),
+                      require("./res/portal_res/portal_ship/portal_ship_specular.png"),
+                    ]}
+                    type="VRX"
+                    onLoadStart={() => {
+                      this._setPortalLoadingStatus(true);
+                    }}
+                    onLoadEnd={() => {
+                      this._setPortalLoadingStatus(false);
+                    }}
+                  />
+                </ViroPortal>
+              </ViroPortalScene>
+              <ViroText
+                text="CBO"
+                scale={[0.5, 0.5, 0.5]}
+                position={[
+                  this.state.standPos.posX + 2,
+                  this.state.standPos.posY + 1,
+                  this.state.standPos.posZ,
+                ]}
+                style={styles.helloWorldTextStyle}
+                materials={["frontMaterial", "backMaterial", "sideMaterial"]}
+                extrusionDepth={8}
+                onClick={() => {
+                  Alert.alert("Enter this scene to inspect LoC metric");
+                }}
+              />
+              <ViroPortalScene
+                passable={true}
+                dragType="FixedDistance"
+                onDrag={() => {}}
+              >
+                <ViroPortal
+                  position={[
+                    this.state.standPos.posX + 2,
+                    this.state.standPos.posY,
+                    this.state.standPos.posZ,
+                  ]}
+                  scale={[0.1, 0.1, 0.1]}
+                >
+                  <Viro3DObject
+                    source={require("./res/portal_res/portal_ship/portal_ship.vrx")}
+                    resources={[
+                      require("./res/portal_res/portal_ship/portal_ship_diffuse.png"),
+                      require("./res/portal_res/portal_ship/portal_ship_normal.png"),
+                      require("./res/portal_res/portal_ship/portal_ship_specular.png"),
+                    ]}
+                    type="VRX"
+                    onLoadStart={() => {
+                      this._setPortalLoadingStatus(true);
+                    }}
+                    onLoadEnd={() => {
+                      this._setPortalLoadingStatus(false);
+                    }}
+                  />
+                </ViroPortal>
               </ViroPortalScene>
             </>
           ) : (
             <ViroText
               text="Stand here"
               scale={[0.5, 0.5, 0.5]}
-              position={[this.state.standPos.posX, 0, this.state.standPos.posY]}
+              position={[
+                this.state.standPos.posX,
+                this.state.standPos.posY,
+                this.state.standPos.posZ,
+              ]}
               style={styles.helloWorldTextStyle}
               materials={["frontMaterial", "backMaterial", "sideMaterial"]}
               extrusionDepth={8}
@@ -253,7 +291,7 @@ export class FirstScene extends Component {
             />
           )}
           <ViroText
-            text="Next Scene"
+            text="Next Project"
             scale={[0.5, 0.5, 0.5]}
             position={[1, 1.5, -2.5]}
             style={styles.helloWorldTextStyle}
@@ -290,24 +328,36 @@ export class FirstScene extends Component {
       if (diff != undefined) {
         if (diff <= 1.3) {
           this.setState({
-            portals: Object.assign({}, this.state.portals, {portalsShown: true}),
+            portals: Object.assign({}, this.state.portals, {
+              portalsShown: true,
+            }),
           });
         } else {
-          this.setState({
-            portals: Object.assign({}, this.state.portals, {portalsShown: false, portalsLoading: false}),
-          });
+          if (!this.state.portals.portalsShown) {
+            this.setState({
+              portals: Object.assign({}, this.state.portals, {
+                portalsShown: false,
+                portalsLoading: false,
+              }),
+            });
+          }
         }
       } else {
         this.setState({
-          portals: Object.assign({}, this.state.portals, {portalsShown: true, portalsLoading: false}),
+          portals: Object.assign({}, this.state.portals, {
+            portalsShown: true,
+            portalsLoading: false,
+          }),
         });
       }
     }
   }
 
   _pushNextScene() {
+    let current = this.state.chosen_project + 1 <= codeVisualizerServer.project_ids.length - 1 ? this.state.chosen_project + 1 : 0;
+    this.setState({chosen_project: current})
     //Pass the scenes to the ARScene
-    this.props.sceneNavigator.push({ scene: state.scenes[1], state: state });
+    this.props.sceneNavigator.push({ scene: state.scenes[0], state: state });
   }
 
   _logText() {
@@ -321,11 +371,126 @@ export class FirstScene extends Component {
       });
     }
   }
-  _setPortalLoadingStatus(loading){
+  _setPortalLoadingStatus(loading) {
     this.setState({
-      portals: Object.assign({}, this.state.portals, {portalsLoading: loading})
-    })
+      portals: Object.assign({}, this.state.portals, {
+        portalsLoading: loading,
+      }),
+    });
   }
+  /* Fetcher for the Metrics */
+  async _metricGenerator() {
+    let promises = codeVisualizerServer.metrics.map(async (element) => {
+      await axios
+        .get(
+          `${codeVisualizerServer.address}/metrics/${codeVisualizerServer.user_id}/${codeVisualizerServer.project_ids[this.state.chosen_project]}/${element}`,
+          {}
+        )
+        .then((res) => {
+          let filteredData = res.data.files.map((element) => {
+            return {
+              violations: element.violations.filter((violation) => {
+                return violation.endline - violation.beginline;
+              }),
+              filename: element.filename,
+            };
+          });
+
+          let counter = 0;
+          let length = res.data.files.length;
+          let fieldSize = 3;
+          let max = 0;
+          let min = 1000;
+          //Find min and max
+          filteredData.forEach((element) => {
+            let violation =
+              element.violations[element.violations.length - 1].endline -
+              element.violations[element.violations.length - 1].beginline;
+            if (max <= violation) {
+              max = violation;
+            }
+            if (min >= violation) {
+              min = violation;
+            }
+          });
+
+          filteredData = filteredData.map((val, key) => {
+            counter++;
+            return (
+              <>
+                <ViroBox
+                  position={[
+                    Math.floor(counter % 5),
+                    2*(val.violations[val.violations.length-1].endline -
+                      val.violations[val.violations.length-1].beginline - min) /
+                      (max - min),
+                    Math.floor(counter / 5),
+                  ]}
+                  scale={[
+                    fieldSize / (length + 5),
+                    2*(val.violations[val.violations.length-1].endline -
+                      val.violations[val.violations.length-1].beginline - min) /
+                      (max - min),
+                    fieldSize / (length + 5),
+                  ]}
+                  key={key}
+                  materials={["basic"]}
+                  onClick={()=>{
+                    Alert.alert(val.filename)
+                  }}
+                />
+                <ViroText
+                  text={
+                    " " +
+                    val.violations[val.violations.length-1].endline -
+                    val.violations[val.violations.length-1].beginline
+                  }
+                  position={[
+                    Math.floor(counter % 5),
+                    2 +
+                      (val.violations[val.violations.length-1].endline -
+                        val.violations[val.violations.length-1].beginline) /
+                        max,
+                    Math.floor(counter / 5),
+                  ]}
+                  rotation={this.state.rotation}
+                  style={styles.helloWorldTextStyle}
+                  materials={["frontMaterial", "backMaterial", "sideMaterial"]}
+                  extrusionDepth={8}
+                />
+              </>
+            );
+          });
+
+          this.setState({
+            loadedData: Object.assign(
+              {},
+              { ...this.state.loadedData },
+              {
+                [element]: {
+                  isMetricLoaded: true,
+                  data: filteredData,
+                  max: max,
+                  min: min,
+                },
+              }
+            ),
+          });
+        })
+        .catch((err) => {
+          Alert.alert("error");
+        });
+    });
+    await Promise.all(promises)
+      .then(() => {
+        this.setState({ isLoaded: true });
+        this.setState({ isLoading: false });
+      })
+      .catch((err) => {
+        Alert.alert(JSON.stringify(err));
+      });
+  }
+
   _setStartValue(data) {
     this.setState({
       standPos: {
@@ -336,6 +501,7 @@ export class FirstScene extends Component {
       },
     });
   }
+
   _displayName({ name, posX, posY, posZ }) {
     this.setState({
       text: name,
